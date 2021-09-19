@@ -2,7 +2,7 @@
 
 /* This script allows you to set a few varaibles and automatically generate the DBT select script and the dbdiagram.io code */
 
-
+/* Set target table */
 set table_n = 'ORDERS';
 
 /* Set additional variables*/
@@ -14,11 +14,8 @@ set dbt_source = 'talent_hack_app';
 /* Don't change these */
 set full_table = '"' || $source_n || '"."'|| $schema_n ||'"."'|| $table_n ||'"';
 set info = '"' || $source_n || '"."INFORMATION_SCHEMA"."COLUMNS"';
-//select $full_table;
-//select $info;
 
 /* Create select statement for DBT */
-
 SELECT
   TABLE_CATALOG
   ,TABLE_SCHEMA
