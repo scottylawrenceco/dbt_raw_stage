@@ -1,14 +1,14 @@
 /* This is intended to run in Snowflake only. */
 /* Set database */
-set source_n = 'STITCH_DATA';
+set source_n = 'FIVETRAN';
 /* Set Schema */
-set schema_n = 'STRIPE';
+set schema_n = 'AMPLITUDE';
 /* Set table to convert to DBT view */
-set table_n = 'CHARGES';
+set table_n = 'EVENT_TYPE';
 
 /* Set the data source name used in DBT. 
 The output will use {{source('dbt_source','table_n')}} in your from statement */
-set dbt_source = 'talent_hack_app';
+set dbt_source = (select lower($schema_n));
 
 
 
@@ -24,12 +24,10 @@ SELECT
   ,TABLE_NAME
   ,('"' || TABLE_CATALOG || '"."' || TABLE_SCHEMA || '"."' || TABLE_NAME || '"') as "FULL_TABLE"
   ,('"' || TABLE_CATALOG || '"."INFORMATION_SCHEMA"."COLUMNS"') as COLUMN_TABLE
-  
-,(SELECT
-    LISTAGG(CASE WHEN MERGE_ORDER = 1 THEN REPLACE(QUERY_NAME,',','') ELSE QUERY_NAME END) within group (order by merge_order)
+  ,(SELECT LISTAGG(CASE WHEN MERGE_ORDER = 1 THEN REPLACE(QUERY_NAME,',','') ELSE QUERY_NAME END) within group (order by merge_order)
 FROM
-    (
-    SELECT * FROM (      
+    (SELECT * 
+     FROM (      
           (SELECT 
           0::int as merge_order
           ,'{{
@@ -51,6 +49,7 @@ FROM
     identifier($info)
 WHERE
     TABLE_SCHEMA = $schema_n
+    
     and TABLE_NAME = $table_n
 ORDER BY ORDINAL_POSITION)
       
@@ -67,6 +66,6 @@ FROM
 
 FROM
   identifier($info_t)
-  //"SOURCE_STITCH_DATA"."INFORMATION_SCHEMA"."TABLES"    
 WHERE
     TABLE_NAME = $table_n
+    and TABLE_SCHEMA = $schema_n
